@@ -20,7 +20,7 @@ describe("analyze", () => {
     const frames = Array.from({ length: 20 }, (_, i) =>
       makeFrame({ name: `fn${i}`, selfTimePct: 20 - i })
     );
-    const result = analyze(frames, { topN: 5, includeDeps: false });
+    const result = analyze(frames, { topN: 5, includeDeps: false, mode: "cpu" });
     expect(result).toHaveLength(5);
   });
 
@@ -30,7 +30,7 @@ describe("analyze", () => {
       makeFrame({ name: "fast", selfTimePct: 5 }),
       makeFrame({ name: "medium", selfTimePct: 20 }),
     ];
-    const result = analyze(frames, { topN: 10, includeDeps: false });
+    const result = analyze(frames, { topN: 10, includeDeps: false, mode: "cpu" });
     expect(result[0]!.name).toBe("slow");
     expect(result[1]!.name).toBe("medium");
     expect(result[2]!.name).toBe("fast");
@@ -41,7 +41,7 @@ describe("analyze", () => {
       makeFrame({ name: "userFn", url: "/app/src/index.ts", isUserCode: true }),
       makeFrame({ name: "depFn", url: "/app/node_modules/lodash/index.js", isUserCode: false }),
     ];
-    const result = analyze(frames, { topN: 10, includeDeps: false });
+    const result = analyze(frames, { topN: 10, includeDeps: false, mode: "cpu" });
     expect(result.every((f) => f.isUserCode)).toBe(true);
     expect(result).toHaveLength(1);
   });
@@ -51,16 +51,28 @@ describe("analyze", () => {
       makeFrame({ name: "userFn", isUserCode: true }),
       makeFrame({ name: "depFn", isUserCode: false }),
     ];
-    const result = analyze(frames, { topN: 10, includeDeps: true });
+    const result = analyze(frames, { topN: 10, includeDeps: true, mode: "cpu" });
     expect(result).toHaveLength(2);
   });
 
   it("attaches a diagnosis to each frame", () => {
     const frames = [makeFrame()];
-    const result = analyze(frames, { topN: 10, includeDeps: false });
+    const result = analyze(frames, { topN: 10, includeDeps: false, mode: "cpu" });
     expect(result[0]!.diagnosis).toBeDefined();
     expect(result[0]!.diagnosis.severity).toMatch(/^(critical|warning|info)$/);
     expect(typeof result[0]!.diagnosis.explanation).toBe("string");
     expect(typeof result[0]!.diagnosis.fix).toBe("string");
+  });
+
+  it("uses memory rules when mode is memory", () => {
+    const frames = [makeFrame({ name: "Buffer.alloc", selfTimePct: 20 })];
+    const result = analyze(frames, { topN: 10, includeDeps: false, mode: "memory" });
+    expect(result[0]!.diagnosis.severity).toBe("critical");
+  });
+
+  it("uses io rules when mode is io", () => {
+    const frames = [makeFrame({ name: "fs.readFile", selfTimePct: 30 })];
+    const result = analyze(frames, { topN: 10, includeDeps: false, mode: "io" });
+    expect(result[0]!.diagnosis.severity).toBe("critical");
   });
 });

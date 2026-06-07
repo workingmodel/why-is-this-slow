@@ -11,7 +11,7 @@ export default defineConfig({
     js: "#!/usr/bin/env node",
   },
   onSuccess: async () => {
-    // launcher.js is plain JS — copy it alongside the bundle
     copyFileSync("src/launcher.js", "dist/launcher.js");
+    copyFileSync("src/io-launcher.js", "dist/io-launcher.js");
   },
 });

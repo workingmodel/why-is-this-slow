@@ -8,10 +8,10 @@ export interface ProfileResult {
   cleanup: () => void;
 }
 
-// launcher.js lives next to this file in src/ (and in dist/ after build)
 const LAUNCHER = path.join(__dirname, "launcher.js");
+const IO_LAUNCHER = path.join(__dirname, "io-launcher.js");
 
-export async function profile(
+export async function profileCpu(
   command: string,
   scriptArgs: string[],
   durationMs: number
@@ -19,12 +19,9 @@ export async function profile(
   const outDir = fs.mkdtempSync(path.join(os.tmpdir(), "wm-profile-"));
   const scriptPath = path.resolve(scriptArgs[0] ?? "");
   const extraArgs = scriptArgs.slice(1);
-
-  // Resolve the node binary
   const nodeBin = command === "node" ? process.execPath : command;
 
-  // Spawn: node --cpu-prof --cpu-prof-dir=<outDir> launcher.js <script> <duration> [...extra]
-  const child = execa(
+  await execa(
     nodeBin,
     [
       "--cpu-prof",
@@ -35,15 +32,8 @@ export async function profile(
       String(durationMs),
       ...extraArgs,
     ],
-    {
-      cwd: outDir, // profile written relative to cwd — point at outDir to be sure
-      env: process.env,
-      reject: false,
-      stdio: "inherit",
-    }
+    { cwd: outDir, env: process.env, reject: false, stdio: "inherit" }
   );
-
-  await child;
 
   const files = fs.readdirSync(outDir).filter((f) => f.endsWith(".cpuprofile"));
   if (files.length === 0) {
@@ -53,8 +43,69 @@ export async function profile(
     );
   }
 
+  return makeResult(path.join(outDir, files[0]!), outDir);
+}
+
+export async function profileMemory(
+  command: string,
+  scriptArgs: string[],
+  durationMs: number
+): Promise<ProfileResult> {
+  const outDir = fs.mkdtempSync(path.join(os.tmpdir(), "wm-profile-"));
+  const scriptPath = path.resolve(scriptArgs[0] ?? "");
+  const extraArgs = scriptArgs.slice(1);
+  const nodeBin = command === "node" ? process.execPath : command;
+
+  await execa(
+    nodeBin,
+    [
+      "--heap-prof",
+      `--heap-prof-dir=${outDir}`,
+      LAUNCHER,
+      scriptPath,
+      String(durationMs),
+      ...extraArgs,
+    ],
+    { cwd: outDir, env: process.env, reject: false, stdio: "inherit" }
+  );
+
+  const files = fs.readdirSync(outDir).filter((f) => f.endsWith(".heapprofile"));
+  if (files.length === 0) {
+    fs.rmSync(outDir, { recursive: true, force: true });
+    throw new Error(`No .heapprofile generated.`);
+  }
+
+  return makeResult(path.join(outDir, files[0]!), outDir);
+}
+
+export async function profileIo(
+  command: string,
+  scriptArgs: string[],
+  durationMs: number
+): Promise<ProfileResult> {
+  const outDir = fs.mkdtempSync(path.join(os.tmpdir(), "wm-profile-"));
+  const reportPath = path.join(outDir, "io-report.json");
+  const scriptPath = path.resolve(scriptArgs[0] ?? "");
+  const extraArgs = scriptArgs.slice(1);
+  const nodeBin = command === "node" ? process.execPath : command;
+
+  await execa(
+    nodeBin,
+    [IO_LAUNCHER, scriptPath, String(durationMs), reportPath, ...extraArgs],
+    { cwd: process.cwd(), env: process.env, reject: false, stdio: "inherit" }
+  );
+
+  if (!fs.existsSync(reportPath)) {
+    fs.rmSync(outDir, { recursive: true, force: true });
+    throw new Error(`No I/O report generated.`);
+  }
+
+  return makeResult(reportPath, outDir);
+}
+
+function makeResult(profilePath: string, outDir: string): ProfileResult {
   return {
-    profilePath: path.join(outDir, files[0]!),
+    profilePath,
     cleanup: () => {
       try {
         fs.rmSync(outDir, { recursive: true, force: true });

@@ -14,11 +14,28 @@ const COLORS = {
   info:     chalk.cyan,
 } as const;
 
+const MODE_LABEL = {
+  cpu:    "CPU",
+  memory: "Memory",
+  io:     "Async I/O",
+} as const;
+
+function formatValue(selfTimeMs: number, mode: string): string {
+  if (mode === "memory") {
+    const kb = selfTimeMs / 1024;
+    return kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb.toFixed(0)} KB`;
+  }
+  return selfTimeMs >= 1000
+    ? `${(selfTimeMs / 1000).toFixed(2)}s`
+    : `${selfTimeMs.toFixed(0)}ms`;
+}
+
 export function render(report: Report): void {
-  const { scriptName, durationMs, frames, flamegraphPath } = report;
+  const { scriptName, durationMs, frames, flamegraphPath, mode } = report;
+  const modeLabel = MODE_LABEL[mode];
 
   console.log();
-  console.log(chalk.bold(`Bottleneck Report — ${scriptName} (${(durationMs / 1000).toFixed(1)}s sample)`));
+  console.log(chalk.bold(`${modeLabel} Bottleneck Report — ${scriptName} (${(durationMs / 1000).toFixed(1)}s sample)`));
   console.log(chalk.dim("─".repeat(72)));
   console.log();
 
@@ -34,14 +51,12 @@ export function render(report: Report): void {
 
     const icon = ICONS[severity];
     const color = COLORS[severity];
-    const location = url ? `${path.relative(process.cwd(), url)}:${lineNumber}` : "";
-    const stats = [
-      `${selfTimeMs.toFixed(0)}ms total`,
-      `called ${callCount}x`,
-      `${selfTimePct.toFixed(1)}% of CPU`,
-    ].join(" — ");
+    const location = url ? `${path.relative(process.cwd(), url.replace("file:", ""))}:${lineNumber}` : "";
+    const valueStr = formatValue(selfTimeMs, mode);
+    const callStr = mode !== "memory" ? ` — called ${callCount}x` : "";
+    const stats = `${valueStr}${callStr} — ${selfTimePct.toFixed(1)}% of ${modeLabel.toLowerCase()}`;
 
-    console.log(`${icon}  ${color.bold(name)}  ${chalk.dim(location)}`);
+    console.log(`${icon}  ${color.bold(name)}${location ? `  ${chalk.dim(location)}` : ""}`);
     console.log(`   ${chalk.dim(stats)}`);
     console.log(`   ${explanation}`);
     console.log(`   ${chalk.green("→")} ${fix}`);
@@ -49,7 +64,12 @@ export function render(report: Report): void {
   }
 
   if (flamegraphPath) {
-    console.log(chalk.dim(`Full flamegraph saved to: ${flamegraphPath}`));
+    console.log(chalk.dim(`Flamegraph saved → ${flamegraphPath}`));
+    console.log(chalk.dim(`Open at: https://www.speedscope.app (drag and drop the file)`));
     console.log();
   }
+}
+
+export function renderJson(report: Report): void {
+  console.log(JSON.stringify(report, null, 2));
 }

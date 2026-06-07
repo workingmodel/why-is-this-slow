@@ -1,8 +1,10 @@
+export type ProfilingMode = "cpu" | "memory" | "io";
+
 export interface HotFrame {
   name: string;
   url: string;
   lineNumber: number;
-  selfTimeMs: number;
+  selfTimeMs: number;   // bytes for memory mode, ms for cpu/io
   selfTimePct: number;
   callCount: number;
   isUserCode: boolean;
@@ -23,4 +25,6 @@ export interface Report {
   durationMs: number;
   frames: DiagnosedFrame[];
   flamegraphPath: string | null;
+  mode: ProfilingMode;
+  totalBytes?: number;  // memory mode only
 }
