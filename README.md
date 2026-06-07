@@ -1,5 +1,7 @@
 # wm-why-is-this-slow
 
+[![npm version](https://img.shields.io/npm/v/wm-why-is-this-slow.svg)](https://www.npmjs.com/package/wm-why-is-this-slow)
+
 Zero-config CLI that profiles a Node.js app and outputs a plain-English bottleneck report. No setup, no dashboard, no API key. You run it, it tells you what's slow and why.
 
 Developed by [Working Model Inc](https://workingmodel.co)
