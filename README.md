@@ -121,4 +121,4 @@ Every Node performance problem ends the same way: someone adds a console.log, st
 
 ## More tools →
 
-More tools from Working Model → [workingmodel.co](https://workingmodel.co)
+More tools from Working Model → [workingmodel.co](https://workingmodel.co) · [npm @workingmodel](https://www.npmjs.com/org/workingmodel)
