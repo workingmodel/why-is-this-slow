@@ -1,11 +1,11 @@
 {
-  "name": "wm-why-is-this-slow",
-  "version": "0.1.0",
-  "description": "Zero-config CLI that profiles a Node.js app and outputs a plain-English bottleneck report. No setup, no dashboard, no API key. You run it, it tells you what's slow and why. Developed by Working Model Inc.",
+  "name": "@workingmodel/why-is-this-slow",
+  "version": "1.0.0",
+  "description": "Tells you in plain English why your Node app is slow.",
   "license": "MIT",
   "author": "Working Model",
   "bin": {
-    "wm-why-is-this-slow": "dist/index.js"
+    "why-is-this-slow": "dist/index.js"
   },
   "main": "./dist/index.js",
   "files": [
@@ -30,17 +30,21 @@
     "vitest": "^4.1.8"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18.0.0"
   },
   "keywords": [
-    "profiler",
+    "slow",
     "performance",
+    "profiler",
+    "debug",
     "nodejs",
     "cli",
-    "bottleneck"
+    "bottleneck",
+    "why"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/workingmodel/wm-why-is-this-slow.git"
-  }
+    "url": "git+https://github.com/workingmodel/why-is-this-slow.git"
+  },
+  "homepage": "https://github.com/workingmodel/why-is-this-slow#readme"
 }

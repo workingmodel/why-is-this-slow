@@ -1,14 +1,10 @@
-# wm-why-is-this-slow
+# @workingmodel/why-is-this-slow
 
-[![npm version](https://img.shields.io/npm/v/wm-why-is-this-slow.svg)](https://www.npmjs.com/package/wm-why-is-this-slow)
+Tells you in plain English why your Node app is slow. Developed by [Working Model](https://workingmodel.co).
 
-Zero-config CLI that profiles a Node.js app and outputs a plain-English bottleneck report. No setup, no dashboard, no API key. You run it, it tells you what's slow and why.
-
-Developed by [Working Model Inc](https://workingmodel.co)
-
-```
-npx wm-why-is-this-slow node server.js
-```
+[![npm version](https://img.shields.io/npm/v/@workingmodel/why-is-this-slow)](https://www.npmjs.com/package/@workingmodel/why-is-this-slow)
+[![npm downloads](https://img.shields.io/npm/dm/@workingmodel/why-is-this-slow)](https://www.npmjs.com/package/@workingmodel/why-is-this-slow)
+[![license](https://img.shields.io/npm/l/@workingmodel/why-is-this-slow)](LICENSE)
 
 ```
 CPU Bottleneck Report — server.js (10.1s sample)
@@ -36,11 +32,11 @@ CPU Bottleneck Report — server.js (10.1s sample)
 
 ```bash
 # Run once without installing
-npx wm-why-is-this-slow node server.js
+npx @workingmodel/why-is-this-slow node server.js
 
 # Or install globally
-npm install -g wm-why-is-this-slow
-wm-why-is-this-slow node server.js
+npm install -g @workingmodel/why-is-this-slow
+why-is-this-slow node server.js
 ```
 
 **Requirements:** Node.js 18+. No other setup.
@@ -50,35 +46,35 @@ wm-why-is-this-slow node server.js
 ## Usage
 
 ```bash
-wm-why-is-this-slow <command> [script] [...args]
+why-is-this-slow <command> [script] [...args]
 ```
 
 ### Examples
 
 ```bash
 # Profile a server for 10 seconds (default)
-wm-why-is-this-slow node server.js
+why-is-this-slow node server.js
 
 # Profile a script that takes arguments
-wm-why-is-this-slow node scripts/migrate.js --env production
+why-is-this-slow node scripts/migrate.js --env production
 
 # Profile for 30 seconds
-wm-why-is-this-slow node server.js --duration 30
+why-is-this-slow node server.js --duration 30
 
 # Profile heap allocations instead of CPU
-wm-why-is-this-slow node server.js --memory
+why-is-this-slow node server.js --memory
 
 # Profile async I/O wait time
-wm-why-is-this-slow node server.js --io
+why-is-this-slow node server.js --io
 
 # Save a flamegraph (opens in speedscope.app)
-wm-why-is-this-slow node server.js --flamegraph
+why-is-this-slow node server.js --flamegraph
 
 # Machine-readable JSON output
-wm-why-is-this-slow node server.js --json > report.json
+why-is-this-slow node server.js --json > report.json
 
 # Include node_modules frames (hidden by default)
-wm-why-is-this-slow node server.js --include-deps
+why-is-this-slow node server.js --include-deps
 ```
 
 ---
@@ -117,6 +113,12 @@ wm-why-is-this-slow node server.js --include-deps
 
 ---
 
-## License
+## Why This Exists
 
-MIT © [Working Model](https://workingmodel.co)
+Every Node performance problem ends the same way: someone adds a console.log, stares at a flamegraph they can't read, or pastes an error into a forum and waits. The tools exist but they assume you already know what you're looking for. This one doesn't. You point it at your app and it tells you what's slow, why it's slow, and what to do about it — in plain English, with no setup.
+
+---
+
+## More tools →
+
+More tools from Working Model → [workingmodel.co](https://workingmodel.co)
